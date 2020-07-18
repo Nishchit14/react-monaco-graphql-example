@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+
+        <style>
+            .div {
+              margin: 0;
+              padding: 0;
+            }
+      
+            .full-height {
+              height: 100vh;
+            }
+      
+            .column {
+              width: 50%;
+            }
+          </style>
+
+    </head>
+
+    <body style="margin: 0; padding: 0;">
+
+        <div id="root"></div>
+
+        <div style="display: flex;">
+          <div class="full-height column">
+            <div id="toolbar" style=""></div>
+            <div id="operation" style="height: 70vh;"></div>
+            <div id="variables" style="height: 30vh;"></div>
+          </div>
+          <div
+            id="results"
+            class="full-height column"
+            aria-label="Result Window"
+            aria-live="polite"
+            aria-atomic="true"
+          ></div>
+        </div>
+
+        <script src="./app.js"></script>
+        <script src="./editor.worker.js"></script>
+        <script src="./graphql.worker.js"></script>
+    </body>
+</html>

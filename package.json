@@ -1,0 +1,36 @@
+{
+  "name": "react-monaco-editor-browser-example",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Monaco Editor for React",
+  "scripts": {
+    "start": "NODE_OPTIONS=\"--max-old-space-size=4096\"  && webpack-dev-server --hot --inline --progress --colors --port 8886"
+  },
+  "authors": [
+    "Leon Shi <superRaytin@gmail.com>",
+    "Dominik Moritz <domoritz@gmail.com>"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.10.4",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
+    "@babel/preset-react": "^7.10.4",
+    "babel-loader": "^8.1.0",
+    "css-loader": "^3.6.0",
+    "file-loader": "^6.0.0",
+    "monaco-editor-webpack-plugin": "^1.9.0",
+    "style-loader": "^1.2.1",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0",
+    "worker-loader": "^2.0.0"
+  },
+  "dependencies": {
+    "graphql": "^15.3.0",
+    "monaco-graphql": "^0.2.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-monaco-editor": "latest"
+  }
+}
