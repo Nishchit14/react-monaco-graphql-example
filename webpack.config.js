@@ -7,9 +7,7 @@ const rootPath = (...args) => relPath(...args);
 
 module.exports = {
   entry: {
-    // app: "./index.js",
-    //app: "./graphql.js",
-    app: "./graphql-example.js",
+    app: "./index.js",
     'editor.worker': 'monaco-editor/esm/vs/editor/editor.worker.js',
     // 'json.worker': 'monaco-editor/esm/vs/language/json/json.worker.js',
     'graphql.worker': 'monaco-graphql/esm/graphql.worker.js',

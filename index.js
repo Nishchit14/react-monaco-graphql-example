@@ -1,218 +1,152 @@
-import React from "react";
-import { render } from "react-dom";
-import MonacoEditor, { MonacoDiffEditor } from "react-monaco-editor";
+/* global monaco */
 
-class CodeEditor extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      times: [ 1 ],
-      code: "// type your code... \n",
-      theme: "vs-light",
-    };
-  }
+import 'regenerator-runtime/runtime';
+import { api as GraphQLAPI } from 'monaco-graphql/esm/monaco.contribution';
 
-  onChange = (newValue) => {
-    this.setState({ code: newValue})
-    console.log("onChange", newValue); // eslint-disable-line no-console
-  };
+import EditorWorker from 'worker-loader!monaco-editor/esm/vs/editor/editor.worker';
+import JSONWorker from 'worker-loader!monaco-editor/esm/vs/language/json/json.worker';
+import GraphQLWorker from 'worker-loader!monaco-graphql/esm/graphql.worker';
 
-  editorDidMount = (editor) => {
-    // eslint-disable-next-line no-console
-    console.log("editorDidMount", editor, editor.getValue(), editor.getModel());
-    this.editor = editor;
-  };
+const SCHEMA_URL = 'https://api.spacex.land/graphql/';
 
-  changeEditorValue = () => {
-    if (this.editor) {
-      this.editor.setValue("// code changed! \n");
+window.MonacoEnvironment = {
+  getWorker(_workerId, label) {
+    if (label === 'graphqlDev') {
+      return new GraphQLWorker();
     }
-  };
+    if (label === 'json') {
+      return new JSONWorker();
+    }
+    return new EditorWorker();
+  },
+};
 
-  changeBySetState = () => {
-    this.setState({ code: "// code changed by setState! \n" });
-  };
+const schemaInput = document.createElement('input');
+schemaInput.type = 'text';
 
-  setDarkTheme = () => {
-    this.setState({ theme: "vs-dark" });
-  };
+schemaInput.value = SCHEMA_URL;
 
-  setLightTheme = () => {
-    this.setState({ theme: "vs-light" });
-    this.setState({ times: [...this.state.times, 1]})
-  };
-
-  render() {
-    const { code, theme, times } = this.state;
-    const options = {
-      selectOnLineNumbers: true,
-      roundedSelection: false,
-      readOnly: false,
-      cursorStyle: "line",
-      automaticLayout: false,
-    };
-    return (
-      <div>
-        <div>
-          <button onClick={this.changeEditorValue} type="button">
-            Change value
-          </button>
-          <button onClick={this.changeBySetState} type="button">
-            Change by setState
-          </button>
-          <button onClick={this.setDarkTheme} type="button">
-            Set dark theme
-          </button>
-          <button onClick={this.setLightTheme} type="button">
-            Set light theme
-          </button>
-        </div>
-        <hr />
-
-        {
-          times.map((t, i)=> {
-            return (
-              <MonacoEditor
-                height="100"
-                language="javascript"
-                value={code}
-                options={options}
-                onChange={this.onChange}
-                editorDidMount={this.editorDidMount}
-                theme={theme}
-                key={i}
-              />
-            )
-          })
-        }
-      </div>
-    );
+schemaInput.onkeyup = e => {
+  e.preventDefault();
+  // @ts-ignore
+  const val = e?.target?.value;
+  if (val && typeof val === 'string') {
+    monaco.languages.graphql.graphqlDefaults.setSchemaConfig({ uri: val });
   }
-}
+};
 
-class AnotherEditor extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      code: ["{", '    "$schema": "http://myserver/foo-schema.json"', "}"].join(
-        "\n"
-      ),
-      language: "json",
-    };
-  }
+const toolbar = document.getElementById('toolbar');
+toolbar?.appendChild(schemaInput);
 
-  changeLanguage = () => {
-    this.setState((prev) => ({
-      language: prev.language === "json" ? "javascript" : "json",
-    }));
-  };
-
-  editorWillMount = (monaco) => {
-    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      validate: true,
-      schemas: [
-        {
-          uri: "http://myserver/foo-schema.json",
-          schema: {
-            type: "object",
-            properties: {
-              p1: {
-                enum: ["v1", "v2"],
-              },
-              p2: {
-                $ref: "http://myserver/bar-schema.json",
-              },
-            },
-          },
-        },
-        {
-          uri: "http://myserver/bar-schema.json",
-          schema: {
-            type: "object",
-            properties: {
-              q1: {
-                enum: ["x1", "x2"],
-              },
-            },
-          },
-        },
-      ],
-    });
-  };
-
-  render() {
-    const { code, language } = this.state;
-    return (
-      <div>
-        <div>
-          <button onClick={this.changeLanguage} type="button">
-            Change by setState
-          </button>
-          <span style={{ marginLeft: "3em" }}>
-            Language:
-            {this.state.language}
-          </span>
-        </div>
-        <hr />
-        <div>
-          <MonacoEditor
-            width="800"
-            height="300"
-            language={language}
-            defaultValue={code}
-            editorWillMount={this.editorWillMount}
-          />
-        </div>
-      </div>
-    );
-  }
-}
-
-class DiffEditor extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      code: 'const a = "Hello Monaco"',
-      original: 'const a = "Hello World"',
-    };
-  }
-
-  onChange = (newValue) => {
-    console.log("onChange", newValue); // eslint-disable-line no-console
-  };
-
-  render() {
-    const { code, original } = this.state;
-    return (
-      <div>
-        <button onClick={() => this.setState({ code })} type="button">
-          Reset
-        </button>
-        <hr />
-        <MonacoDiffEditor
-          width="800"
-          height="300"
-          language="javascript"
-          value={code}
-          original={original}
-          onChange={this.onChange}
-        />
-      </div>
-    );
-  }
-}
-
-const App = () => (
-  <div>
-    <h2>Monaco Editor Sample (controlled mode)</h2>
-    <CodeEditor />
-    <hr />
-    <h2>Another editor (uncontrolled mode)</h2>
-    <AnotherEditor />
-    <hr />
-    <h2>Another editor (showing a diff)</h2>
-    <DiffEditor />
-  </div>
+const variablesModel = monaco.editor.createModel(
+  `{}`,
+  'json',
+  monaco.Uri.file('/1/variables.json'),
 );
 
-render(<App />, document.getElementById("root"));
+const resultsEditor = monaco.editor.create(
+  document.getElementById('results'),
+  {
+    model: variablesModel,
+    automaticLayout: true,
+  },
+);
+const variablesEditor = monaco.editor.create(
+  document.getElementById('variables'),
+  {
+    value: `{ "limit": 10 }`,
+    language: 'json',
+    automaticLayout: true,
+  },
+);
+const model = monaco.editor.createModel(
+  `
+query Example($limit: Int) { 
+  launchesPast(limit: $limit) {
+    mission_name
+    # format me using the right click context menu
+              launch_date_local
+    launch_site {
+      site_name_long
+    }
+    links {
+      article_link
+      video_link
+    }
+  }
+}
+`,
+  'graphqlDev',
+  monaco.Uri.file('/1/operation.graphql'),
+);
+
+const operationEditor = monaco.editor.create(
+  document.getElementById('operation'),
+  {
+    model,
+    automaticLayout: true,
+  },
+);
+
+GraphQLAPI.setSchemaUri(SCHEMA_URL);
+// monaco.languages.graphql.graphqlDefaults.setSchemaConfig({ uri: SCHEMA_URL });
+
+/**
+ * Basic Operation Exec Example
+ */
+
+async function executeCurrentOp() {
+  try {
+    const operation = operationEditor.getValue();
+    const variables = variablesEditor.getValue();
+    const body= { query: operation };
+    const parsedVariables = JSON.parse(variables);
+    if (parsedVariables && Object.keys(parsedVariables).length) {
+      body.variables = variables;
+    }
+    const result = await fetch(SCHEMA_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    const resultText = await result.text();
+    resultsEditor.setValue(JSON.stringify(JSON.parse(resultText), null, 2));
+  } catch (err) {
+    resultsEditor.setValue(err.toString());
+  }
+}
+
+const opAction = {
+  id: 'graphql-run',
+  label: 'Run Operation',
+  contextMenuOrder: 0,
+  contextMenuGroupId: 'graphql',
+  keybindings: [
+    // eslint-disable-next-line no-bitwise
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+  ],
+  run: executeCurrentOp,
+};
+
+operationEditor.addAction(opAction);
+variablesEditor.addAction(opAction);
+resultsEditor.addAction(opAction);
+
+// add your own diagnostics? why not!
+// monaco.editor.setModelMarkers(
+//   model,
+//   'graphql',
+//   [{
+//     severity: 5,
+//     message: 'An example diagnostic error',
+//     startColumn: 2,
+//     startLineNumber: 4,
+//     endLineNumber: 4,
+//     endColumn: 0,
+//   }],
+// );
+
+// operationEditor.onDidChangeModelContent(() => {
+//   // this is where
+// })
