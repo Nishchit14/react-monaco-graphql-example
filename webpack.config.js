@@ -10,7 +10,7 @@ module.exports = {
     app: "./index.js",
     'editor.worker': 'monaco-editor/esm/vs/editor/editor.worker.js',
     // 'json.worker': 'monaco-editor/esm/vs/language/json/json.worker.js',
-    'graphql.worker': 'monaco-graphql/esm/graphql.worker.js',
+    // 'graphql.worker': 'monaco-graphql/esm/graphql.worker.js',
   },
   mode: "development",
   devtool: "source-map",
@@ -42,13 +42,13 @@ module.exports = {
           },
         ],
       },
-      {
-        test: /\.worker\.js$/,
-        use: { 
-          loader: 'worker-loader',
-          options: { inline: true } 
-        },
-      },
+      // {
+      //   test: /\.worker\.js$/,
+      //   use: { 
+      //     loader: 'worker-loader',
+      //     options: { inline: true } 
+      //   },
+      // },
       {
         test: /\.css$/,
         use: ["style-loader", "css-loader"],
@@ -67,6 +67,14 @@ module.exports = {
   plugins: [
     new MonacoWebpackPlugin({
       languages: ["json", "javascript", "typescript"],
+      filename: "graphql.worker.js",
+      workers: [
+        {
+          id: 'graphqlDev',
+          label: 'graphqlDev',
+          entry: require.resolve('monaco-graphql/esm/graphql.worker.js'),
+        },
+      ]
     }),
   ],
   devServer: { contentBase: "./" },
